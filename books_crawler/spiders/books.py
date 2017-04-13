@@ -5,12 +5,29 @@ import glob
 import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
+import ConfigParser
+
+Config = ConfigParser.ConfigParser()
+Config.read('../config.ini')
+
+def ConfigSectionMap(section):
+    dict1 = {}
+    options = Config.options(section)
+    for option in options:
+        try:
+            dict1[option] = Config.get(section, option)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    return dict1
 
 def product_info(response, value):
     return response.xpath('//th[text()="' + value + '"]/following-sibling::td/text()').extract_first()
 
-class AmazonBooksSpider(Spider):
-    name = 'amazon_books'
+class BooksSpider(Spider):
+    name = 'books'
     allowed_domains = ['books.toscrape.com']
     start_urls = ['http://books.toscrape.com']
 
@@ -56,9 +73,12 @@ class AmazonBooksSpider(Spider):
     def close(self, reason):
         csv_file = max(glob.iglob('*.csv'), key=os.path.getctime)
 
+        User = ConfigSectionMap('SectionOne')['user']
+        Password = ConfigSectionMap('SectionOne')['password']
+
         mydb = MySQLdb.connect(host='localhost',
-                               user='root',
-                               passwd='foo',
+                               user=User,
+                               passwd=Password,
                                db='books_db')
         cursor = mydb.cursor()
 
