@@ -16,19 +16,23 @@ def db_connect():
     return create_engine(URL(**settings.DATABASE))
 
 
-def create_deals_table(engine):
+def create_books_table(engine):
     """"""
     DeclarativeBase.metadata.create_all(engine)
 
 
-class Deals(DeclarativeBase):
-    """Sqlalchemy deals model"""
-    __tablename__ = "deals"
+class Books(DeclarativeBase):
+    """Sqlalchemy books model"""
+    __tablename__ = "books"
 
-    id = Column(Integer, primary_key=True)
-    title = Column('title', String)
-    link = Column('link', String, nullable=True)
-    location = Column('location', String, nullable=True)
-    original_price = Column('original_price', Integer, nullable=True)
-    price = Column('price', Integer, nullable=True)
-    end_date = Column('end_date', DateTime, nullable=True)
+    title = Column('Title', String, nullable=True)
+    price = Column('Price', String, nullable=True)
+
+    # id = Column(Integer, primary_key=True)
+    # upc = Column('UPC', String, nullable=True)
+    # product_type = Column('Product Type', String, nullable=True)
+    # price_without_tax = Column('Price (excl. tax)', String, nullable=True)
+    # price_with_tax = Column('Price (incl. tax)', String, nullable=True)
+    # tax = Column('Tax', String, nullable=True)
+    # availability = Column('Availability', String, nullable=True)
+    # number_of_reviews = Column('Number of reviews', String, nullable=True)

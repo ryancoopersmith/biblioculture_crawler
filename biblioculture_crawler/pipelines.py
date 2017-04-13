@@ -5,7 +5,7 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 from sqlalchemy.orm import sessionmaker
-from models import Deals, db_connect, create_deals_table
+from models import Books, db_connect, create_books_table
 
 class BibliocultureCrawlerPipeline(object):
     def process_item(self, item, spider):
@@ -17,23 +17,23 @@ class AmazonBooksPipeline(object):
     def __init__(self):
         """
         Initializes database connection and sessionmaker.
-        Creates deals table.
+        Creates books table.
         """
         engine = db_connect()
-        create_deals_table(engine)
+        create_books_table(engine)
         self.Session = sessionmaker(bind=engine)
 
     def process_item(self, item, spider):
-        """Save deals in the database.
+        """Save books in the database.
 
         This method is called for every item pipeline component.
 
         """
         session = self.Session()
-        deal = Deals(**item)
+        book = Books(**item)
 
         try:
-            session.add(deal)
+            session.add(book)
             session.commit()
         except:
             session.rollback()
