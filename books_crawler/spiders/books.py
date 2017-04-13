@@ -5,10 +5,10 @@ import glob
 import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
-import configparser
+import ConfigParser
 
-config = configparser.ConfigParser()
-config.read('../config.ini')
+config = ConfigParser.ConfigParser()
+config.read(os.path.dirname(__file__) + '/../config.ini')
 
 def product_info(response, value):
     return response.xpath('//th[text()="' + value + '"]/following-sibling::td/text()').extract_first()
@@ -60,12 +60,12 @@ class BooksSpider(Spider):
     def close(self, reason):
         csv_file = max(glob.iglob('*.csv'), key=os.path.getctime)
 
-        username = config['database']['User']
-        password = config['database']['Password']
+        Username = config.get('database', 'Username')
+        Password = config.get('database', 'Password')
 
         mydb = MySQLdb.connect(host='localhost',
-                               user=username,
-                               passwd=password,
+                               user=Username,
+                               passwd=Password,
                                db='books_db')
         cursor = mydb.cursor()
 
