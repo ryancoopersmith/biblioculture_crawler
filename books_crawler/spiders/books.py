@@ -5,23 +5,10 @@ import glob
 import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
-import ConfigParser
+import configparser
 
-Config = ConfigParser.ConfigParser()
-Config.read('../config.ini')
-
-def ConfigSectionMap(section):
-    dict1 = {}
-    options = Config.options(section)
-    for option in options:
-        try:
-            dict1[option] = Config.get(section, option)
-            if dict1[option] == -1:
-                DebugPrint("skip: %s" % option)
-        except:
-            print("exception on %s!" % option)
-            dict1[option] = None
-    return dict1
+config = configparser.ConfigParser()
+config.read('../config.ini')
 
 def product_info(response, value):
     return response.xpath('//th[text()="' + value + '"]/following-sibling::td/text()').extract_first()
@@ -73,12 +60,12 @@ class BooksSpider(Spider):
     def close(self, reason):
         csv_file = max(glob.iglob('*.csv'), key=os.path.getctime)
 
-        User = ConfigSectionMap('SectionOne')['user']
-        Password = ConfigSectionMap('SectionOne')['password']
+        username = config['database']['User']
+        password = config['database']['Password']
 
         mydb = MySQLdb.connect(host='localhost',
-                               user=User,
-                               passwd=Password,
+                               user=username,
+                               passwd=password,
                                db='books_db')
         cursor = mydb.cursor()
 
