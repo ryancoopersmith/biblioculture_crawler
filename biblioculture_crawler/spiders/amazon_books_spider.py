@@ -1,21 +1,32 @@
-import scrapy
-from scrapy import Selector
+# -*- coding: utf-8 -*-
+from scrapy import Spider
+from scrapy.http import Request
 
-class AmazonBooksSpider(scrapy.Spider):
-    name = "amazon_books"
-    start_urls = [
-        'https://www.amazon.com/b/ref=s9_acss_bw_en_BGG15eve_d_1_1_w?_encoding=UTF8&node=1&pd_rd_r=XH38QTWP922WGKVA3KP0&pd_rd_w=FM9M4&pd_rd_wg=poHR3&pf_rd_m=ATVPDKIKX0DER&pf_rd_s=merchandised-search-top-3&pf_rd_r=XH38QTWP922WGKVA3KP0&pf_rd_r=XH38QTWP922WGKVA3KP0&pf_rd_t=101&pf_rd_p=e8ce74da-9c3d-45b7-a3fd-ea13b4732f00&pf_rd_p=e8ce74da-9c3d-45b7-a3fd-ea13b4732f00&pf_rd_i=283155',
-    ]
+class AmazonBooksSpider(Spider):
+    name = 'books'
+    allowed_domains = ['books.toscrape.com']
+    start_urls = (
+        'http://books.toscrape.com/',
+    )
 
     def parse(self, response):
+        books = response.xpath('//*[@class="book"]')
+        for book in books:
+            text = book.xpath(
+                './/*[@class="text"]/text()').extract_first()
 
-        for book in response.css('div.a-fixed-left-grid'):
+            author = book.xpath(
+                './/*[@itemprop="author"]/text()').extract_first()
+
+            tags = book.xpath('.//*[@class="tag"]/text()').extract()
+
             yield {
-                'name': book.css('h2.s-access-title::text').extract_first(),
-                'author': book.css('a.a-link-normal::text').extract_first()
+                    'Text': text,
+                    'Author': author,
+                    'Tags': tags
             }
 
-        # next_page = response.css('li.next a::attr(href)').extract_first()
-        # if next_page is not None:
-        #     next_page = response.urljoin(next_page)
-        #     yield scrapy.Request(next_page, callback=self.parse)
+        next_page_url = response.xpath(
+            '//*[@class="next"]/a/@href').extract_first()
+        absolute_next_page_url = response.urljoin(next_page_url)
+        yield Request(absolute_next_page_url)
