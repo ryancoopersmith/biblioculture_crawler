@@ -41,6 +41,8 @@ class EbayBooksSpider(Spider):
         isbn_10 = isbn(response, 'ISBN-10:')
         isbn_13 = isbn(response, 'ISBN-13:')
 
+        price = response.xpath('//*[@class="pdpbestpricestyle"]/text()').extract_first()
+
         yield {
             'title': title,
             'rating': rating,

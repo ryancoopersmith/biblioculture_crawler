@@ -42,6 +42,10 @@ class AlibrisBooksSpider(Spider):
 
         isbn_13 = response.xpath('//*[@class="isbn-link"]/text()').extract_first()
 
+        price = response.xpath('//*[@id="tabAll"]/span/text()').extract_first()
+        price = price.split(' ')
+        price = price[1]
+
         yield {
             'title': title,
             'rating': rating,

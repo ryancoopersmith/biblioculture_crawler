@@ -41,6 +41,14 @@ class AmazonBooksSpider(Spider):
         isbn_10 = isbn(response, 4)
         isbn_13 = isbn(response, 5)
 
+        used_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[1]/a/text()')[1].extract()
+        new_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[2]/a/text()')[1].extract()
+        
+        if used_price <= new_price:
+            price = used_price
+        else:
+            price = new_price
+
         yield {
             'title': title,
             'rating': rating,
