@@ -37,13 +37,6 @@ class AmazonBooksSpider(Spider):
         ISBN_10 = isbn(response, 4)
         ISBN_13 = isbn(response, 5)
 
-        # rating = response.xpath('//*[contains(@class, "star-rating")]/@class').extract_first()
-        # rating = rating.replace('star-rating ', '')
-        #
-        # description = response.xpath(
-        #     '//*[@id="product_description"]/following-sibling::p/text()').extract_first()
-
-
         yield {
             'title': title,
             'rating': rating,
