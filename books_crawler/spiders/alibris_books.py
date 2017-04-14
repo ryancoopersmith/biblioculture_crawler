@@ -23,7 +23,7 @@ class AlibrisBooksSpider(Spider):
     def parse(self, response):
         for category in categories:
             absolute_url = response.urljoin('/search/books/subject/' + category)
-            yield Request(absolute_next_page_url, callback=self.parse_category)
+            yield Request(absolute_url, callback=self.parse_category)
 
     def parse_category(self, response):
         books = response.xpath('//*[@id="selected-works"]/ul/li/a/@href').extract()

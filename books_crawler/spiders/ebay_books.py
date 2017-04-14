@@ -20,8 +20,8 @@ class EbayBooksSpider(Spider):
     def parse(self, response):
         categories = response.xpath('//tr/td[2]/a/@href')[3:54].extract()
         for category in categories:
-            absolute_url = response.urljoin(book)
-            yield Request(absolute_next_page_url, callback=self.parse_category)
+            absolute_url = response.urljoin(category)
+            yield Request(absolute_url, callback=self.parse_category)
 
     def parse_category(self, response):
         books = response.xpath('//*[@class="imageborder"]/@href').extract()
