@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import csv
 import glob
@@ -21,7 +20,6 @@ class PowellsBooksSpider(Spider):
             absolute_url = response.urljoin(book)
             yield Request(absolute_url, callback=self.parse_book)
 
-        # process next page
         next_page_urls = response.xpath('//*[@class="dontmiss"]/ul/li/a/@href').extract()
         for next_page_url in next_page_urls:
             absolute_next_page_url = response.urljoin(next_page_url)

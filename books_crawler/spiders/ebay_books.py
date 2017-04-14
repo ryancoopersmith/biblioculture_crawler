@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import csv
 import glob
@@ -16,18 +15,23 @@ def isbn(response, value):
 class EbayBooksSpider(Spider):
     name = 'ebay_books'
     allowed_domains = ['ebay.com']
-    start_urls = ['http://books.products.half.ebay.com/antiques-collectibles_W0QQcZ4QQcatZ218176']
+    start_urls = ['http://books.products.half.ebay.com']
 
     def parse(self, response):
+        categories = response.xpath('//tr/td[2]/a/@href')[3:54].extract()
+        for category in categories:
+            absolute_url = response.urljoin(book)
+            yield Request(absolute_next_page_url, callback=self.parse_category)
+
+    def parse_category(self, response):
         books = response.xpath('//*[@class="imageborder"]/@href').extract()
         for book in books:
             absolute_url = response.urljoin(book)
             yield Request(absolute_url, callback=self.parse_book)
 
-        # process next page
         next_page_url = response.xpath('//*[text()="Next"]/@href').extract_first()
         absolute_next_page_url = response.urljoin(next_page_url)
-        yield Request(absolute_next_page_url)
+        yield Request(absolute_next_page_url, callback=self.parse_category)
 
     def parse_book(self, response):
         name = response.xpath('//*[@class="pdppagetitle"]/text()').extract_first()

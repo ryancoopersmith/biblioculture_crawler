@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import csv
 import glob
@@ -16,18 +15,23 @@ def isbn(response, value):
 class AmazonBooksSpider(Spider):
     name = 'amazon_books'
     allowed_domains = ['amazon.com']
-    start_urls = ['https://www.amazon.com/Arts-Photography-Books/s?ie=UTF8&page=1&rh=n%3A1']
+    start_urls = ['https://amazon.com/b/ref=usbk_surl_books/?node=283155']
 
     def parse(self, response):
+        categories = response.xpath('//*[@id="ref_1000"]/li/a/@href').extract()
+        for category in categories:
+            absolute_url = response.urljoin(book)
+            yield Request(absolute_next_page_url, callback=self.parse_category)
+
+    def parse_category(self, response):
         books = response.xpath('//a[contains(@class, "a-link-normal") and contains(@class, "s-access-detail-page")]/@href').extract()
         for book in books:
             absolute_url = response.urljoin(book)
             yield Request(absolute_url, callback=self.parse_book)
 
-        # process next page
         next_page_url = response.xpath('//a[@title="Next Page"]/@href').extract_first()
         absolute_next_page_url = response.urljoin(next_page_url)
-        yield Request(absolute_next_page_url)
+        yield Request(absolute_next_page_url, callback=self.parse_category)
 
     def parse_book(self, response):
         name = response.xpath('//span[@id="productTitle"]/text()').extract_first()
