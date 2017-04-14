@@ -4,7 +4,10 @@ books_crawler/items.py
 books_crawler/pipelines.py
 books_crawler/settings.py
 books_crawler/spiders/__init__.py
-books_crawler/spiders/books.py
+books_crawler/spiders/alibris_books.py
+books_crawler/spiders/amazon_books.py
+books_crawler/spiders/ebay_books.py
+books_crawler/spiders/powells_books.py
 project.egg-info/PKG-INFO
 project.egg-info/SOURCES.txt
 project.egg-info/dependency_links.txt
