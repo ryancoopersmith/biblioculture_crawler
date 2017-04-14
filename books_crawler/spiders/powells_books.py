@@ -27,7 +27,10 @@ class PowellsBooksSpider(Spider):
 
     def parse_book(self, response):
         name = response.xpath('//*[@class="book-title"]/text()').extract_first()
-        author = response.xpath('//*[@itemprop="author"]/text()').extract_first()
+
+        authors = response.xpath('//*[@itemprop="author"]/a/text()').extract_first()
+        author = ','.join(authors)
+        
         image = response.xpath('//*[@id="gallery"]/img/@src').extract_first()
 
         isbn_13 = response.xpath('//*[@id="seemore"]/p/text()[2]').extract_first()

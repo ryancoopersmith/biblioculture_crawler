@@ -35,7 +35,10 @@ class AmazonBooksSpider(Spider):
 
     def parse_book(self, response):
         name = response.xpath('//span[@id="productTitle"]/text()').extract_first()
-        author = response.xpath('//a[contains(@class, "a-link-normal") and contains(@class, "contributorNameID")]/text()').extract_first()
+
+        authors = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()').extract()
+        author = ', '.join(authors)
+        
         image = response.xpath('//img[contains(@class, "a-dynamic-image") and contains(@class, "image-stretch-vertical") and contains(@class,"frontImage")]/@src').extract_first()
 
         isbn_10 = isbn(response, 4)
@@ -43,7 +46,7 @@ class AmazonBooksSpider(Spider):
 
         used_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[1]/a/text()')[1].extract()
         new_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[2]/a/text()')[1].extract()
-        
+
         if used_price <= new_price:
             price = used_price
         else:

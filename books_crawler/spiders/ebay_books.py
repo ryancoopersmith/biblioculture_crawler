@@ -35,7 +35,10 @@ class EbayBooksSpider(Spider):
 
     def parse_book(self, response):
         name = response.xpath('//*[@class="pdppagetitle"]/text()').extract_first()
-        author = response.xpath('//*[@class="pdplinks"]/*[@class="pdplinks"]/text()').extract_first()
+
+        authors = response.xpath('//*[@class="pdplinks"]/*[@class="pdplinks"]/text()').extract_first()
+        author = ', '.join(authors)
+        
         image = response.xpath('//tr/td/*[@class="imageborder"]/@src').extract_first()
 
         isbn_10 = isbn(response, 'ISBN-10:')

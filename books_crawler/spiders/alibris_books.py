@@ -37,7 +37,10 @@ class AlibrisBooksSpider(Spider):
 
     def parse_book(self, response):
         name = response.xpath('//*[@class="product-title"]/h1/text()').extract_first()
-        author = response.xpath('//*[@itemprop="author"]/*[@itemprop="name"]/text()').extract_first()
+
+        authors = response.xpath('//*[@itemprop="author"]/*[@itemprop="name"]/text()').extract()
+        author = ', '.join(authors)
+        
         image = response.xpath('//*[@itemprop="image"]/@src').extract_first()
 
         isbn_13 = response.xpath('//*[@class="isbn-link"]/text()').extract_first()
