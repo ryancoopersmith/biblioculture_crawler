@@ -10,32 +10,28 @@ import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.dirname(__file__) + '/../config.ini')
 
-def isbn(response, value):
-    return response.xpath('//*[@class="content"]/ul/li/text()')[value].extract()
-
-class AmazonBooksSpider(Spider):
-    name = 'amazon_books'
-    allowed_domains = ['amazon.com']
-    start_urls = ['https://www.amazon.com/Arts-Photography-Books/s?ie=UTF8&page=1&rh=n%3A1']
+class AlibrisBooksSpider(Spider):
+    name = 'alibris_books'
+    allowed_domains = ['alibris.com']
+    start_urls = ['http://alibris.com/search/books/subject/Architecture']
 
     def parse(self, response):
-        books = response.xpath('//a[contains(@class, "a-link-normal") and contains(@class, "s-access-detail-page")]/@href').extract()
+        books = response.xpath('//*[@id="selected-works"]/ul/li/a/@href').extract()
         for book in books:
             absolute_url = response.urljoin(book)
             yield Request(absolute_url, callback=self.parse_book)
 
         # process next page
-        next_page_url = response.xpath('//a[@title="Next Page"]/@href').extract_first()
+        next_page_url = response.xpath('//*[@id="selected-works"]/ol/li[12]/a/@href').extract_first()
         absolute_next_page_url = response.urljoin(next_page_url)
         yield Request(absolute_next_page_url)
 
     def parse_book(self, response):
-        name = response.xpath('//span[@id="productTitle"]/text()').extract_first()
-        author = response.xpath('//a[contains(@class, "a-link-normal") and contains(@class, "contributorNameID")]/text()').extract_first()
-        image = response.xpath('//img[contains(@class, "a-dynamic-image") and contains(@class, "image-stretch-vertical") and contains(@class,"frontImage")]/@src').extract_first()
+        name = response.xpath('//*[@class="product-title"]/h1/text()').extract_first()
+        author = response.xpath('//*[@itemprop="author"]/*[@itemprop="name"]/text()').extract_first()
+        image = response.xpath('//*[@itemprop="image"]/@src').extract_first()
 
-        isbn_10 = isbn(response, 4)
-        isbn_13 = isbn(response, 5)
+        isbn_13 = response.xpath('//*[@class="isbn-link"]/text()').extract_first()
 
         yield {
             'title': title,

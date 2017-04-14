@@ -34,8 +34,8 @@ class EbayBooksSpider(Spider):
         author = response.xpath('//*[@class="pdplinks"]/*[@class="pdplinks"]/text()').extract_first()
         image = response.xpath('//tr/td/*[@class="imageborder"]/@src').extract_first()
 
-        ISBN_10 = isbn(response, 'ISBN-10:')
-        ISBN_13 = isbn(response, 'ISBN-13:')
+        isbn_10 = isbn(response, 'ISBN-10:')
+        isbn_13 = isbn(response, 'ISBN-13:')
 
         yield {
             'title': title,
