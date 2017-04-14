@@ -38,11 +38,11 @@ class AmazonBooksSpider(Spider):
 
         authors = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()').extract()
         author = ', '.join(authors)
-        
-        image = response.xpath('//img[contains(@class, "a-dynamic-image") and contains(@class, "image-stretch-vertical") and contains(@class,"frontImage")]/@src').extract_first()
 
         isbn_10 = isbn(response, 4)
         isbn_13 = isbn(response, 5)
+
+        image = response.xpath('//img[contains(@class, "a-dynamic-image") and contains(@class, "image-stretch-vertical") and contains(@class,"frontImage")]/@src').extract_first()
 
         used_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[1]/a/text()')[1].extract()
         new_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[2]/a/text()')[1].extract()
@@ -53,10 +53,13 @@ class AmazonBooksSpider(Spider):
             price = new_price
 
         yield {
-            'title': title,
-            'rating': rating,
-            'upc': upc,
-            'product_type': product_type}
+            'name': name,
+            'author': author,
+            'isbn_10': isbn_10,
+            'isbn_13': isbn_13,
+            'image': image,
+            'price': price
+            }
 
     def close(self, reason):
         csv_file = max(glob.iglob('*.csv'), key=os.path.getctime)
@@ -67,7 +70,7 @@ class AmazonBooksSpider(Spider):
         mydb = MySQLdb.connect(host='localhost',
                                user=Username,
                                passwd=Password,
-                               db='books_db')
+                               db='biblioculture_development')
         cursor = mydb.cursor()
 
         csv_data = csv.reader(file(csv_file))
@@ -75,7 +78,10 @@ class AmazonBooksSpider(Spider):
         row_count = 0
         for row in csv_data:
             if row_count != 0:
-                cursor.execute('INSERT IGNORE INTO books_table(rating, product_type, upc, title) VALUES(%s, %s, %s, %s)', row)
+                cursor.execute('INSERT IGNORE INTO books(name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s)', row)
+                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row)
+                cursor.execute('INSERT IGNORE INTO prices(price, book_id) VALUES(%s, %s)', row)
+                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row)
             row_count += 1
 
         mydb.commit()
