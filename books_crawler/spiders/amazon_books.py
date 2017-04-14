@@ -52,13 +52,20 @@ class AmazonBooksSpider(Spider):
         else:
             price = new_price
 
+        book_id = 0
+        price_id = 0
+        site_id = 1
+
         yield {
             'name': name,
             'author': author,
             'isbn_10': isbn_10,
             'isbn_13': isbn_13,
             'image': image,
-            'price': price
+            'price': price,
+            'book_id': book_id,
+            'price_id': price_id,
+            'site_id': site_id
             }
 
     def close(self, reason):
