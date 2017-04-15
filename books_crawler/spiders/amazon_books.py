@@ -44,16 +44,21 @@ class AmazonBooksSpider(Spider):
 
         authors = []
         roles = response.xpath('//*[@id="byline"]/span/span/span/text()').extract()
-        if roles[0] == u'(Author), ':
-            author1 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[0].extract()
-            authors.append(author1)
-        if roles[1] == u'(Author), ':
-            author2 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[1].extract()
-            authors.append(author2)
-        if roles[2] == u'(Author), ':
-            author3 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[2].extract()
-            authors.append(author3)
+        if len(roles) > 0:
+            if 'Author' in roles[0]:
+                author1 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[0].extract()
+                authors.append(author1)
+        if len(roles) > 1:
+            if 'Author' in roles[1]:
+                author2 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[1].extract()
+                authors.append(author2)
+        if len(roles) > 2:
+            if 'Author' in roles[2]:
+                author3 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[2].extract()
+                authors.append(author3)
         author = ', '.join(authors)
+        if author == '':
+            author = 'not provided'
 
         isbn_10 = isbn(response, 3)
         isbn_13 = isbn(response, 4)
@@ -68,7 +73,8 @@ class AmazonBooksSpider(Spider):
             used_price = re.sub('\$', '', used_price)
             used_price_compare = float(used_price)
         else:
-            used_price_compare = 1000000
+            used_price_compare = 0
+            used_price = 0
 
         if response.xpath('//*[@class="olp-new olp-link"]/a/text()').extract():
             new_price = response.xpath('//*[@class="olp-new olp-link"]/a/text()')[1].extract()
@@ -76,11 +82,16 @@ class AmazonBooksSpider(Spider):
             new_price = re.sub('\$', '', new_price)
             new_price_compare = float(new_price)
         else:
-            new_price_compare = 1000000
-
-        if new_price_compare == 1000000 and used_price_compare == 1000000:
             new_price_compare = 0
-            used_price_compare = 0
+            new_price = 0
+
+        if response.xpath('//*[@class="a-section a-spacing-small a-spacing-top-small"]/span/span/text()').extract():
+            new_price = response.xpath('//*[@class="a-section a-spacing-small a-spacing-top-small"]/span/span/text()')[0].extract()
+            used_price = response.xpath('//*[@class="a-section a-spacing-small a-spacing-top-small"]/span/span/text()')[1].extract()
+            new_price = re.sub('\$', '', new_price)
+            used_price = re.sub('\$', '', used_price)
+            new_price_compare = float(new_price)
+            used_price_compare = float(used_price)
 
         if used_price_compare <= new_price_compare:
             price = used_price
