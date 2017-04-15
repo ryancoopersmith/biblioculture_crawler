@@ -26,7 +26,7 @@ class AmazonBooksSpider(Spider):
         for category in categories:
             absolute_url = response.urljoin(category)
             yield Request(absolute_url, callback=self.parse_category)
-            # Not going to next pages before switching categories
+
     def parse_category(self, response):
         books = response.xpath('//a[contains(@class, "a-link-normal") and contains(@class, "s-access-detail-page")]/@href').extract()
         for book in books:
@@ -34,8 +34,9 @@ class AmazonBooksSpider(Spider):
             yield Request(absolute_url, callback=self.parse_book)
 
         next_page_url = response.xpath('//a[@title="Next Page"]/@href').extract_first()
-        absolute_next_page_url = response.urljoin(next_page_url)
-        yield Request(absolute_next_page_url, callback=self.parse_category)
+        if next_page_url:
+            absolute_next_page_url = response.urljoin(next_page_url)
+            yield Request(absolute_next_page_url, callback=self.parse_category)
 
     def parse_book(self, response):
         name = response.xpath('//span[@id="productTitle"]/text()').extract_first()

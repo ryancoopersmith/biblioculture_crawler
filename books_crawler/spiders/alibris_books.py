@@ -33,8 +33,9 @@ class AlibrisBooksSpider(Spider):
             yield Request(absolute_url, callback=self.parse_book)
 
         next_page_url = response.xpath('//*[@id="selected-works"]/ol/li[12]/a/@href').extract_first()
-        absolute_next_page_url = response.urljoin(next_page_url)
-        yield Request(absolute_next_page_url, callback=self.parse_category)
+        if next_page_url:
+            absolute_next_page_url = response.urljoin(next_page_url)
+            yield Request(absolute_next_page_url, callback=self.parse_category)
 
     def parse_book(self, response):
         name = response.xpath('//*[@class="product-title"]/h1/text()').extract_first()

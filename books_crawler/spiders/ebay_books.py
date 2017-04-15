@@ -31,8 +31,9 @@ class EbayBooksSpider(Spider):
             yield Request(absolute_url, callback=self.parse_book)
 
         next_page_url = response.xpath('//*[text()="Next"]/@href').extract_first()
-        absolute_next_page_url = response.urljoin(next_page_url)
-        yield Request(absolute_next_page_url, callback=self.parse_category)
+        if next_page_url:
+            absolute_next_page_url = response.urljoin(next_page_url)
+            yield Request(absolute_next_page_url, callback=self.parse_category)
 
     def parse_book(self, response):
         name = response.xpath('//*[@class="pdppagetitle"]/text()').extract_first()
@@ -57,12 +58,10 @@ class EbayBooksSpider(Spider):
             'isbn_10': isbn_10,
             'isbn_13': isbn_13,
             'image': image,
-            'locations_book_id': book_id,
-            'locations_site_id': site_id,
             'price': price,
-            'prices_book_id': book_id,
-            'site_prices_site_id': site_id,
-            'site_prices_price_id': price_id
+            'book_id': book_id,
+            'price_id': price_id,
+            'site_id': site_id
             }
 
     def close(self, reason):
