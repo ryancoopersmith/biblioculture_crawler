@@ -95,9 +95,16 @@ class AlibrisBooksSpider(Spider):
         row_count = 0
         for row in csv_data:
             if row_count != 0:
-                cursor.execute('INSERT IGNORE INTO books(id, name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s, %s)', row[0:6])
-                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[6:8])
-                cursor.execute('INSERT IGNORE INTO prices(id, price, book_id) VALUES(%s, %s, %s)', row[8:11])
+                book_id = cursor.execute('SELECT id FROM books WHERE isbn_13 = %s', [row[4]])
+                if book_id:
+                    locations_values = [book_id, row[7]]
+                    cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', locations_values)
+                    prices_values = [row[8], row[9], book_id]
+                    cursor.execute('INSERT IGNORE INTO prices(id, price, book_id) VALUES(%s, %s, %s)', prices_values)
+                else:
+                    cursor.execute('INSERT IGNORE INTO books(id, name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s, %s)', row[0:6])
+                    cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[6:8])
+                    cursor.execute('INSERT IGNORE INTO prices(id, price, book_id) VALUES(%s, %s, %s)', row[8:11])
                 cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row[11:13])
             row_count += 1
 
