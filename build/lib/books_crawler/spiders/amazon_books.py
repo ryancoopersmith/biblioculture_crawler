@@ -7,6 +7,7 @@ from scrapy.http import Request
 import ConfigParser
 import re
 import uuid
+import csv
 
 config = ConfigParser.ConfigParser()
 config.read(os.path.dirname(__file__) + '/../config.ini')
@@ -26,7 +27,7 @@ class AmazonBooksSpider(Spider):
         for category in categories:
             absolute_url = response.urljoin(category)
             yield Request(absolute_url, callback=self.parse_category)
-            # Not going to next pages before switching categories
+
     def parse_category(self, response):
         books = response.xpath('//a[contains(@class, "a-link-normal") and contains(@class, "s-access-detail-page")]/@href').extract()
         for book in books:
@@ -75,10 +76,12 @@ class AmazonBooksSpider(Spider):
             'isbn_10': isbn_10,
             'isbn_13': isbn_13,
             'image': image,
+            'locations_book_id': book_id,
+            'locations_site_id': site_id,
             'price': price,
-            'book_id': book_id,
-            'price_id': price_id,
-            'site_id': site_id
+            'prices_book_id': book_id,
+            'site_prices_site_id': site_id,
+            'site_prices_price_id': price_id
             }
 
     def close(self, reason):
@@ -98,10 +101,10 @@ class AmazonBooksSpider(Spider):
         row_count = 0
         for row in csv_data:
             if row_count != 0:
-                cursor.execute('INSERT IGNORE INTO books(name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s)', row)
-                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row)
-                cursor.execute('INSERT IGNORE INTO prices(price, book_id) VALUES(%s, %s)', row)
-                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row)
+                cursor.execute('INSERT IGNORE INTO books(name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s)', row[0:4])
+                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[5:6])
+                cursor.execute('INSERT IGNORE INTO prices(price, book_id) VALUES(%s, %s)', row[7:8])
+                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row[9:10])
             row_count += 1
 
         mydb.commit()

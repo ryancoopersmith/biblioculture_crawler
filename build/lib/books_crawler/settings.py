@@ -14,6 +14,7 @@ BOT_NAME = 'books_crawler'
 SPIDER_MODULES = ['books_crawler.spiders']
 NEWSPIDER_MODULE = 'books_crawler.spiders'
 
+FEED_EXPORT_FIELDS = ['name', 'author', 'isbn_10', 'isbn_13', 'image', 'locations_book_id', 'locations_site_id', 'price', 'prices_book_id', 'site_prices_site_id', 'site_prices_price_id']
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1"
