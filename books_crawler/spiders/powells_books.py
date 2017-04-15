@@ -49,6 +49,7 @@ class PowellsBooksSpider(Spider):
         site_id = 4
 
         yield {
+            'book_id': book_id,
             'name': name,
             'author': author,
             'isbn_10': isbn_10,
@@ -56,6 +57,7 @@ class PowellsBooksSpider(Spider):
             'image': image,
             'locations_book_id': book_id,
             'locations_site_id': site_id,
+            'price_id': price_id,
             'price': price,
             'prices_book_id': book_id,
             'site_prices_site_id': site_id,
@@ -79,10 +81,10 @@ class PowellsBooksSpider(Spider):
         row_count = 0
         for row in csv_data:
             if row_count != 0:
-                cursor.execute('INSERT IGNORE INTO books(name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s)', row[0:5])
-                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[5:7])
-                cursor.execute('INSERT IGNORE INTO prices(price, book_id) VALUES(%s, %s)', row[7:9])
-                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row[9:11])
+                cursor.execute('INSERT IGNORE INTO books(id, name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s, %s)', row[0:6])
+                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[6:8])
+                cursor.execute('INSERT IGNORE INTO prices(id, price, book_id) VALUES(%s, %s, %s)', row[8:11])
+                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row[11:13])
             row_count += 1
 
         mydb.commit()
