@@ -1,1 +1,5 @@
+# Ignore config
 /books_crawler/config.ini
+
+#Ignore CSV
+*.csv
