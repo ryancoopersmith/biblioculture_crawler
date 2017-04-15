@@ -5,6 +5,7 @@ import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
+import re
 
 config = ConfigParser.ConfigParser()
 config.read(os.path.dirname(__file__) + '/../config.ini')
@@ -22,7 +23,7 @@ class AmazonBooksSpider(Spider):
         for category in categories:
             absolute_url = response.urljoin(category)
             yield Request(absolute_url, callback=self.parse_category)
-
+            # Not going to next pages before switching categories
     def parse_category(self, response):
         books = response.xpath('//a[contains(@class, "a-link-normal") and contains(@class, "s-access-detail-page")]/@href').extract()
         for book in books:
@@ -39,10 +40,12 @@ class AmazonBooksSpider(Spider):
         authors = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()').extract()
         author = ', '.join(authors)
 
-        isbn_10 = isbn(response, 4)
-        isbn_13 = isbn(response, 5)
+        isbn_10 = isbn(response, 3)
+        isbn_13 = isbn(response, 4)
 
-        image = response.xpath('//img[contains(@class, "a-dynamic-image") and contains(@class, "image-stretch-vertical") and contains(@class,"frontImage")]/@src').extract_first()
+        image = response.xpath('//*[@id="imgBlkFront"]/@data-a-dynamic-image').extract_first()
+        image = re.sub('\":.*', '', image)
+        image = re.sub('{\"', '', image)
 
         used_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[1]/a/text()')[1].extract()
         new_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[2]/a/text()')[1].extract()
