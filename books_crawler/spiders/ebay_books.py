@@ -5,6 +5,7 @@ import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
+import uuid
 
 config = ConfigParser.ConfigParser()
 config.read(os.path.dirname(__file__) + '/../config.ini')
@@ -46,8 +47,8 @@ class EbayBooksSpider(Spider):
 
         price = response.xpath('//*[@class="pdpbestpricestyle"]/text()').extract_first()
 
-        book_id = 0
-        price_id = 0
+        book_id = uuid.uuid4()
+        price_id = uuid.uuid4()
         site_id = 2
 
         yield {

@@ -5,6 +5,7 @@ import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
+import uuid
 
 config = ConfigParser.ConfigParser()
 config.read(os.path.dirname(__file__) + '/../config.ini')
@@ -50,8 +51,8 @@ class AlibrisBooksSpider(Spider):
         price = price.split(' ')
         price = price[1]
 
-        book_id = 0
-        price_id = 0
+        book_id = uuid.uuid4()
+        price_id = uuid.uuid4()
         site_id = 3
 
         yield {

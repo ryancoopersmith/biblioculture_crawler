@@ -6,11 +6,14 @@ from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
 import re
+import uuid
 
 config = ConfigParser.ConfigParser()
 config.read(os.path.dirname(__file__) + '/../config.ini')
 
 def isbn(response, value):
+    if response.xpath('//*[@class="content"]/ul/li/text()')[value].extract() == u' English' or response.xpath('//*[@class="content"]/ul/li/text()')[value - 1].extract() == u' English' and value == 4:
+        value += 1
     return response.xpath('//*[@class="content"]/ul/li/text()')[value].extract()
 
 class AmazonBooksSpider(Spider):
@@ -47,16 +50,22 @@ class AmazonBooksSpider(Spider):
         image = re.sub('\":.*', '', image)
         image = re.sub('{\"', '', image)
 
-        used_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[1]/a/text()')[1].extract()
-        new_price = response.xpath('//*[@id="tmmSwatches"]/ul/li[2]/span/span[3]/span[2]/a/text()')[1].extract()
+        used_price = response.xpath('//*[@class="olp-used olp-link"]/a/text()')[1].extract()
+        used_price = re.sub('\\n.*', '', used_price)
+        used_price_compare = re.sub('\$', '', used_price)
+        used_price_compare = float(used_price_compare)
+        new_price = response.xpath('//*[@class="olp-new olp-link"]/a/text()')[1].extract()
+        new_price = re.sub('\\n.*', '', new_price)
+        new_price_compare = re.sub('\$', '', new_price)
+        new_price_compare = float(new_price_compare)
 
-        if used_price <= new_price:
+        if used_price_compare <= new_price_compare:
             price = used_price
         else:
             price = new_price
 
-        book_id = 0
-        price_id = 0
+        book_id = uuid.uuid4()
+        price_id = uuid.uuid4()
         site_id = 1
 
         yield {
