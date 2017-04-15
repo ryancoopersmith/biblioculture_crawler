@@ -84,10 +84,10 @@ class EbayBooksSpider(Spider):
         row_count = 0
         for row in csv_data:
             if row_count != 0:
-                cursor.execute('INSERT IGNORE INTO books(name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s)', row[0:4])
-                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%d, %d)', row[5:6])
-                cursor.execute('INSERT IGNORE INTO prices(price, book_id) VALUES(%.2f, %d)', row[7:8])
-                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%d, %d)', row[9:10])
+                cursor.execute('INSERT IGNORE INTO books(name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s)', row[0:5])
+                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[5:7])
+                cursor.execute('INSERT IGNORE INTO prices(price, book_id) VALUES(%s, %s)', row[7:9])
+                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row[9:11])
             row_count += 1
 
         mydb.commit()
