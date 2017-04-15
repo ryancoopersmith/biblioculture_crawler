@@ -5,7 +5,7 @@ import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
-import uuid
+from random import randint
 import re
 import csv
 
@@ -42,9 +42,10 @@ class PowellsBooksSpider(Spider):
         price = response.xpath('//*[@class="price"]/text()').extract_first()
         price = re.sub('\\r', '', price)
         price = re.sub('\\n', '', price)
+        price = re.sub('\$', '', price)
 
-        book_id = uuid.uuid4()
-        price_id = uuid.uuid4()
+        book_id = randint(0,2000000000)
+        price_id = randint(0,2000000000)
         site_id = 4
 
         yield {

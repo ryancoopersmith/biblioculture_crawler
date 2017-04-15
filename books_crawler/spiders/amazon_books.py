@@ -6,7 +6,7 @@ from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
 import re
-import uuid
+from random import randint
 import csv
 
 config = ConfigParser.ConfigParser()
@@ -42,7 +42,17 @@ class AmazonBooksSpider(Spider):
     def parse_book(self, response):
         name = response.xpath('//span[@id="productTitle"]/text()').extract_first()
 
-        authors = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()').extract()
+        authors = []
+        roles = response.xpath('//*[@id="byline"]/span/span/span/text()').extract()
+        if roles[0] == u'(Author), ':
+            author1 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[0].extract()
+            authors.append(author1)
+        if roles[1] == u'(Author), ':
+            author2 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[1].extract()
+            authors.append(author2)
+        if roles[2] == u'(Author), ':
+            author3 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[2].extract()
+            authors.append(author3)
         author = ', '.join(authors)
 
         isbn_10 = isbn(response, 3)
@@ -52,22 +62,33 @@ class AmazonBooksSpider(Spider):
         image = re.sub('\":.*', '', image)
         image = re.sub('{\"', '', image)
 
-        used_price = response.xpath('//*[@class="olp-used olp-link"]/a/text()')[1].extract()
-        used_price = re.sub('\\n.*', '', used_price)
-        used_price_compare = re.sub('\$', '', used_price)
-        used_price_compare = float(used_price_compare)
-        new_price = response.xpath('//*[@class="olp-new olp-link"]/a/text()')[1].extract()
-        new_price = re.sub('\\n.*', '', new_price)
-        new_price_compare = re.sub('\$', '', new_price)
-        new_price_compare = float(new_price_compare)
+        if response.xpath('//*[@class="olp-used olp-link"]/a/text()').extract():
+            used_price = response.xpath('//*[@class="olp-used olp-link"]/a/text()')[1].extract()
+            used_price = re.sub('\\n.*', '', used_price)
+            used_price = re.sub('\$', '', used_price)
+            used_price_compare = float(used_price)
+        else:
+            used_price_compare = 1000000
+
+        if response.xpath('//*[@class="olp-new olp-link"]/a/text()').extract():
+            new_price = response.xpath('//*[@class="olp-new olp-link"]/a/text()')[1].extract()
+            new_price = re.sub('\\n.*', '', new_price)
+            new_price = re.sub('\$', '', new_price)
+            new_price_compare = float(new_price)
+        else:
+            new_price_compare = 1000000
+
+        if new_price_compare == 1000000 and used_price_compare == 1000000:
+            new_price_compare = 0
+            used_price_compare = 0
 
         if used_price_compare <= new_price_compare:
             price = used_price
         else:
             price = new_price
 
-        book_id = uuid.uuid4()
-        price_id = uuid.uuid4()
+        book_id = randint(0,2000000000)
+        price_id = randint(0,2000000000)
         site_id = 1
 
         yield {

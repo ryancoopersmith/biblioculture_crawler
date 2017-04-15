@@ -5,8 +5,9 @@ import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
-import uuid
+from random import randint
 import csv
+import re
 
 config = ConfigParser.ConfigParser()
 config.read(os.path.dirname(__file__) + '/../config.ini')
@@ -48,9 +49,10 @@ class EbayBooksSpider(Spider):
         image = response.xpath('//tr/td/*[@class="imageborder"]/@src').extract_first()
 
         price = response.xpath('//*[@class="pdpbestpricestyle"]/text()').extract_first()
+        price = re.sub('\$', '', price)
 
-        book_id = uuid.uuid4()
-        price_id = uuid.uuid4()
+        book_id = randint(0,2000000000)
+        price_id = randint(0,2000000000)
         site_id = 2
 
         yield {

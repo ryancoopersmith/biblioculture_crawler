@@ -5,8 +5,9 @@ import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
-import uuid
+from random import randint
 import csv
+import re
 
 config = ConfigParser.ConfigParser()
 config.read(os.path.dirname(__file__) + '/../config.ini')
@@ -52,9 +53,10 @@ class AlibrisBooksSpider(Spider):
         price = response.xpath('//*[@id="tabAll"]/span/text()').extract_first()
         price = price.split(' ')
         price = price[1]
+        price = re.sub('\$', '', price)
 
-        book_id = uuid.uuid4()
-        price_id = uuid.uuid4()
+        book_id = randint(0,2000000000)
+        price_id = randint(0,2000000000)
         site_id = 3
 
         yield {
