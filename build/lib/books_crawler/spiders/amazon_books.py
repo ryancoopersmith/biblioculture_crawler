@@ -6,7 +6,7 @@ from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
 import re
-import uuid
+from random import randint
 import csv
 
 config = ConfigParser.ConfigParser()
@@ -42,8 +42,23 @@ class AmazonBooksSpider(Spider):
     def parse_book(self, response):
         name = response.xpath('//span[@id="productTitle"]/text()').extract_first()
 
-        authors = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()').extract()
+        authors = []
+        roles = response.xpath('//*[@id="byline"]/span/span/span/text()').extract()
+        if len(roles) > 0:
+            if 'Author' in roles[0]:
+                author1 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[0].extract()
+                authors.append(author1)
+        if len(roles) > 1:
+            if 'Author' in roles[1]:
+                author2 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[1].extract()
+                authors.append(author2)
+        if len(roles) > 2:
+            if 'Author' in roles[2]:
+                author3 = response.xpath('//*[@id="byline"]/span/span/a/text()|//*[@id="byline"]/span/a/text()')[2].extract()
+                authors.append(author3)
         author = ', '.join(authors)
+        if author == '':
+            author = 'not provided'
 
         isbn_10 = isbn(response, 3)
         isbn_13 = isbn(response, 4)
@@ -52,25 +67,43 @@ class AmazonBooksSpider(Spider):
         image = re.sub('\":.*', '', image)
         image = re.sub('{\"', '', image)
 
-        used_price = response.xpath('//*[@class="olp-used olp-link"]/a/text()')[1].extract()
-        used_price = re.sub('\\n.*', '', used_price)
-        used_price_compare = re.sub('\$', '', used_price)
-        used_price_compare = float(used_price_compare)
-        new_price = response.xpath('//*[@class="olp-new olp-link"]/a/text()')[1].extract()
-        new_price = re.sub('\\n.*', '', new_price)
-        new_price_compare = re.sub('\$', '', new_price)
-        new_price_compare = float(new_price_compare)
+        if response.xpath('//*[@class="olp-used olp-link"]/a/text()').extract():
+            used_price = response.xpath('//*[@class="olp-used olp-link"]/a/text()')[1].extract()
+            used_price = re.sub('\\n.*', '', used_price)
+            used_price = re.sub('\$', '', used_price)
+            used_price_compare = float(used_price)
+        else:
+            used_price_compare = 0
+            used_price = 0
+
+        if response.xpath('//*[@class="olp-new olp-link"]/a/text()').extract():
+            new_price = response.xpath('//*[@class="olp-new olp-link"]/a/text()')[1].extract()
+            new_price = re.sub('\\n.*', '', new_price)
+            new_price = re.sub('\$', '', new_price)
+            new_price_compare = float(new_price)
+        else:
+            new_price_compare = 0
+            new_price = 0
+
+        if response.xpath('//*[@class="a-section a-spacing-small a-spacing-top-small"]/span/span/text()').extract():
+            new_price = response.xpath('//*[@class="a-section a-spacing-small a-spacing-top-small"]/span/span/text()')[0].extract()
+            used_price = response.xpath('//*[@class="a-section a-spacing-small a-spacing-top-small"]/span/span/text()')[1].extract()
+            new_price = re.sub('\$', '', new_price)
+            used_price = re.sub('\$', '', used_price)
+            new_price_compare = float(new_price)
+            used_price_compare = float(used_price)
 
         if used_price_compare <= new_price_compare:
             price = used_price
         else:
             price = new_price
 
-        book_id = uuid.uuid4()
-        price_id = uuid.uuid4()
+        book_id = randint(0,2000000000)
+        price_id = randint(0,2000000000)
         site_id = 1
 
         yield {
+            'book_id': book_id,
             'name': name,
             'author': author,
             'isbn_10': isbn_10,
@@ -78,6 +111,7 @@ class AmazonBooksSpider(Spider):
             'image': image,
             'locations_book_id': book_id,
             'locations_site_id': site_id,
+            'price_id': price_id,
             'price': price,
             'prices_book_id': book_id,
             'site_prices_site_id': site_id,
@@ -101,10 +135,10 @@ class AmazonBooksSpider(Spider):
         row_count = 0
         for row in csv_data:
             if row_count != 0:
-                cursor.execute('INSERT IGNORE INTO books(name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s)', row[0:4])
-                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[5:6])
-                cursor.execute('INSERT IGNORE INTO prices(price, book_id) VALUES(%s, %s)', row[7:8])
-                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row[9:10])
+                cursor.execute('INSERT IGNORE INTO books(id, name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s, %s)', row[0:6])
+                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[6:8])
+                cursor.execute('INSERT IGNORE INTO prices(id, price, book_id) VALUES(%s, %s, %s)', row[8:11])
+                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row[11:13])
             row_count += 1
 
         mydb.commit()

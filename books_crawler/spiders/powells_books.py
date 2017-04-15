@@ -40,9 +40,12 @@ class PowellsBooksSpider(Spider):
         image = response.xpath('//*[@id="gallery"]/img/@src').extract_first()
 
         price = response.xpath('//*[@class="price"]/text()').extract_first()
-        price = re.sub('\\r', '', price)
-        price = re.sub('\\n', '', price)
-        price = re.sub('\$', '', price)
+        if price:
+            price = re.sub('\\r', '', price)
+            price = re.sub('\\n', '', price)
+            price = re.sub('\$', '', price)
+        else:
+            price = 0
 
         book_id = randint(0,2000000000)
         price_id = randint(0,2000000000)

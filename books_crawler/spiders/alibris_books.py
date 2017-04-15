@@ -51,9 +51,12 @@ class AlibrisBooksSpider(Spider):
         image = response.xpath('//*[@itemprop="image"]/@src').extract_first()
 
         price = response.xpath('//*[@id="tabAll"]/span/text()').extract_first()
-        price = price.split(' ')
-        price = price[1]
-        price = re.sub('\$', '', price)
+        if price:
+            price = price.split(' ')
+            price = price[1]
+            price = re.sub('\$', '', price)
+        else:
+            price = 0
 
         book_id = randint(0,2000000000)
         price_id = randint(0,2000000000)

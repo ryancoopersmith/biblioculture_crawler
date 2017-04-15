@@ -5,8 +5,9 @@ import MySQLdb
 from scrapy import Spider
 from scrapy.http import Request
 import ConfigParser
-import uuid
+from random import randint
 import csv
+import re
 
 config = ConfigParser.ConfigParser()
 config.read(os.path.dirname(__file__) + '/../config.ini')
@@ -50,14 +51,19 @@ class AlibrisBooksSpider(Spider):
         image = response.xpath('//*[@itemprop="image"]/@src').extract_first()
 
         price = response.xpath('//*[@id="tabAll"]/span/text()').extract_first()
-        price = price.split(' ')
-        price = price[1]
+        if price:
+            price = price.split(' ')
+            price = price[1]
+            price = re.sub('\$', '', price)
+        else:
+            price = 0
 
-        book_id = uuid.uuid4()
-        price_id = uuid.uuid4()
+        book_id = randint(0,2000000000)
+        price_id = randint(0,2000000000)
         site_id = 3
 
         yield {
+            'book_id': book_id,
             'name': name,
             'author': author,
             'isbn_10': isbn_10,
@@ -65,6 +71,7 @@ class AlibrisBooksSpider(Spider):
             'image': image,
             'locations_book_id': book_id,
             'locations_site_id': site_id,
+            'price_id': price_id,
             'price': price,
             'prices_book_id': book_id,
             'site_prices_site_id': site_id,
@@ -88,10 +95,10 @@ class AlibrisBooksSpider(Spider):
         row_count = 0
         for row in csv_data:
             if row_count != 0:
-                cursor.execute('INSERT IGNORE INTO books(name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s)', row[0:4])
-                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[5:6])
-                cursor.execute('INSERT IGNORE INTO prices(price, book_id) VALUES(%s, %s)', row[7:8])
-                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row[9:10])
+                cursor.execute('INSERT IGNORE INTO books(id, name, author, isbn_10, isbn_13, image) VALUES(%s, %s, %s, %s, %s, %s)', row[0:6])
+                cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', row[6:8])
+                cursor.execute('INSERT IGNORE INTO prices(id, price, book_id) VALUES(%s, %s, %s)', row[8:11])
+                cursor.execute('INSERT IGNORE INTO site_prices(site_id, price_id) VALUES(%s, %s)', row[11:13])
             row_count += 1
 
         mydb.commit()

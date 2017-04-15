@@ -49,7 +49,10 @@ class EbayBooksSpider(Spider):
         image = response.xpath('//tr/td/*[@class="imageborder"]/@src').extract_first()
 
         price = response.xpath('//*[@class="pdpbestpricestyle"]/text()').extract_first()
-        price = re.sub('\$', '', price)
+        if price:
+            price = re.sub('\$', '', price)
+        else:
+            price = 0
 
         book_id = randint(0,2000000000)
         price_id = randint(0,2000000000)
