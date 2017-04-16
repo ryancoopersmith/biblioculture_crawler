@@ -95,11 +95,7 @@ class AlibrisBooksSpider(Spider):
         row_count = 0
         for row in csv_data:
             if row_count != 0:
-                book_id = cursor.execute('SELECT id FROM books WHERE isbn_13 = %s', [row[4]])
-                if !book_id:
-                    book_id = cursor.execute('SELECT id FROM books WHERE isbn_10 = %s', [row[3]])
-                if !book_id:
-                    book_id = cursor.execute('SELECT id FROM books WHERE name = %s', [row[1]])
+                book_id = cursor.execute('SELECT id FROM books WHERE name = %s', [row[1]])
                 if book_id:
                     locations_values = [book_id, row[7]]
                     cursor.execute('INSERT IGNORE INTO locations(book_id, site_id) VALUES(%s, %s)', locations_values)
