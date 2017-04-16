@@ -15,6 +15,14 @@ config.read(os.path.dirname(__file__) + '/../config.ini')
 def isbn(response, value):
     if response.xpath('//*[@class="content"]/ul/li/text()')[value].extract() == u' English' or response.xpath('//*[@class="content"]/ul/li/text()')[value - 1].extract() == u' English' and value == 4:
         value += 1
+
+    unicode_alphabet = [u'a', u'b', u'c', u'd', u'e', u'f', u'g', u'h', u'i', u'j', u'k',
+        u'l', u'm', u'n', u'o', u'p', u'q', u'r', u's', u't', u'u', u'v',
+        u'w', u'x', u'y', u'z']
+    for letter in unicode_alphabet:
+        if letter == response.xpath('//*[@class="content"]/ul/li/text()')[value].extract()[3]:
+            return 'not provided'
+
     return response.xpath('//*[@class="content"]/ul/li/text()')[value].extract()
 
 class AmazonBooksSpider(Spider):
@@ -41,6 +49,8 @@ class AmazonBooksSpider(Spider):
 
     def parse_book(self, response):
         name = response.xpath('//span[@id="productTitle"]/text()').extract_first()
+        if not name:
+            name = response.xpath('//span[@id="ebooksProductTitle"]/text()').extract_first()
 
         authors = []
         roles = response.xpath('//*[@id="byline"]/span/span/span/text()').extract()
@@ -64,6 +74,8 @@ class AmazonBooksSpider(Spider):
         isbn_13 = isbn(response, 4)
 
         image = response.xpath('//*[@id="imgBlkFront"]/@data-a-dynamic-image').extract_first()
+        if not image:
+            image = response.xpath('//*[@id="ebooksImgBlkFront"]/@data-a-dynamic-image').extract_first()
         image = re.sub('\":.*', '', image)
         image = re.sub('{\"', '', image)
 

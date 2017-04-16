@@ -34,7 +34,7 @@ class PowellsBooksSpider(Spider):
         authors = response.xpath('//*[@itemprop="author"]/a/text()').extract()
         author = ','.join(authors)
 
-        isbn_10 = ''
+        isbn_10 = 'not provided'
         isbn_13 = response.xpath('//*[@id="seemore"]/p/text()[2]').extract_first()
 
         image = response.xpath('//*[@id="gallery"]/img/@src').extract_first()

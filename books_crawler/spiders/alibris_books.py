@@ -45,7 +45,7 @@ class AlibrisBooksSpider(Spider):
         authors = response.xpath('//*[@itemprop="author"]/*[@itemprop="name"]/text()').extract()
         author = ', '.join(authors)
 
-        isbn_10 = ''
+        isbn_10 = 'not provided'
         isbn_13 = response.xpath('//*[@class="isbn-link"]/text()').extract_first()
 
         image = response.xpath('//*[@itemprop="image"]/@src').extract_first()
