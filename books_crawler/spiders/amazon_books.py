@@ -29,6 +29,8 @@ class AmazonBooksSpider(Spider):
     name = 'amazon_books'
     allowed_domains = ['amazon.com']
     start_urls = ['https://amazon.com/b/ref=usbk_surl_books/?node=283155']
+    # instead do https://www.amazon.com/s/ref=nb_sb_noss_1?url=search-alias%3Daps&field-keywords=the+great+gatsby
+    # where everything after keywords is the book name with spaces translated as +'s
 
     def parse(self, response):
         categories = response.xpath('//*[@id="ref_1000"]/li/a/@href').extract()
